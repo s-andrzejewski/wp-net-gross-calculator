@@ -8,5 +8,6 @@ class Core
         Timber::$dirname = "../views";
         Assets::init();
         CPT::init();
+        Calculator::registerShortcode();
     }
 }
