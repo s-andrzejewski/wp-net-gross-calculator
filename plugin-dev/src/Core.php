@@ -8,6 +8,7 @@ class Core
         Timber::$dirname = "../views";
         Assets::init();
         CPT::init();
+        RestApi::registerRoutes();
         Calculator::registerShortcode();
     }
 }
