@@ -1,0 +1,86 @@
+{# TODO: #}
+{#
+* define `wp_nonce_field` in PHP
+* define `vat_rate` in PHP
+* strings handling with ACF
+#}
+
+{% block calculator %}
+<div class="ngc-calculator">
+    <h2 class="ngc-calculator__title">
+        Product pricing calculator
+    </h2>
+
+     {# action="" #}
+    <form class="ngc-calculator__form" method="post">
+        {{ wp_nonce_field }}
+
+        <div class="ngc-calculator__form-group">
+            <label class="ngc-calculator__label" for="product_name">
+                Product Name:
+            </label>
+            <input class="ngc-calculator__input"
+                type="text"
+                id="product_name"
+                name="product_name"
+                value="{{ product_name }}"
+                required 
+            />
+        </div>
+
+        <div class="ngc-calculator__form-group">
+            <label class="ngc-calculator__label" for="net_amount">
+                Net Amount:
+            </label>
+            <input class="ngc-calculator__input" type="number" id="net_amount" name="net_amount" value="{{ net_amount }}" step="0.01" required />
+        </div>
+
+        <div class="ngc-calculator__form-group">
+            <label class="ngc-calculator__label" for="currency">
+                Currency:
+            </label>
+            <input class="ngc-calculator__input" type="text" id="currency" name="currency" value="PLN" disabled />
+        </div>
+
+        <div class="ngc-calculator__form-group">
+            <label class="ngc-calculator__label" for="vat_rate">
+                VAT Rate:
+            </label>
+            <select class="ngc-calculator__select" id="vat_rate" name="vat_rate" required>
+                {#! TEMPORARY #}
+                    {% set vat_rate = [
+                        { 'value': '0', 'label': '0%' },
+                        { 'value': '0.03', 'label': '3%' },
+                        { 'value': '0.05', 'label': '5%' },
+                        { 'value': '0.07', 'label': '7%' },
+                        { 'value': '0.08', 'label': '8%' },
+                        { 'value': '0.22', 'label': '22%' },
+                        { 'value': '0.23', 'label': '23%' },
+                        { 'value': '0', 'label': 'zw.' },
+                        { 'value': '0', 'label': 'np.' },
+                        { 'value': '0', 'label': 'oo.' }
+                    ] %}
+                {#! END TEMPORARY #}
+                {% for option in vat_rate %}
+                    <option class="ngc-calculator__option" value="{{ option.value }}">
+                        {{ option.label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="ngc-calculator__form-group">
+            {# type="submit" #}
+            <button class="ngc-calculator__button" type="button" name="calculate" value="1">
+                Calculate
+            </button>
+        </div>
+    </form>
+
+    <div class="ngc-calculator__result">
+        <p class="ngc-calculator__result-text">
+            The price of product "{{ product_name }}", is: {{ gross_amount }} PLN, the tax amount is {{ tax_amount }} PLN.
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -18,6 +18,11 @@ use NetGrossCalc\Core;
 
 defined('ABSPATH') || exit;
 
+if ( !class_exists('Timber\\Timber') ) {
+    echo 'Timber not found. Install it from <a href="https://packagist.org/packages/timber/timber">composer</a>.<br>';
+    return;
+}
+
 define( 'NGC_BASENAME', plugin_basename(__FILE__) );
 define( 'NGC_NAME', dirname(NGC_BASENAME) );
 define( 'NGC_URL', untrailingslashit( plugin_dir_url(__FILE__)) );
