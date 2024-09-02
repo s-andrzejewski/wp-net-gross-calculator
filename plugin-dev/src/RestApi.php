@@ -31,26 +31,23 @@ class RestApi
         // 'currency' => string,
         // 'vatRate' => double (eg. 0.23) or null,
 
-        if (!empty($params)) {
-            // TODO: Copy validation from frontend:
-            $params['netAmount'] = doubleval($params['netAmount']);
-            $params['vatRate'] = doubleval($params['vatRate']);
-
+        try {
             foreach ($params as $key => $value) {
                 if ($value === null) {
                     return new WP_REST_Response([
                         'message' => "'{$key}' is required."
                     ], 400);
                 }
-                if (gettype($value) == 'double' && $value < 0.0) {
+                if (
+                    ($key == 'netAmount' || $key == 'vatRate')
+                    && $value < 0.0
+                    ) {
                     return new WP_REST_Response([
                         'message' => "'{$key}' have to be a positive value."
                     ], 400);
                 }
             }
-        }
 
-        try {
             $result = Calculator::calculate($params);
 
             return new WP_REST_Response([
@@ -58,9 +55,11 @@ class RestApi
                 'result' => $result
             ], 200);
         } catch (\Exception $e) {
-            error_log('Error doing calculation: ' . $e->getMessage());
+            $message = $e->getMessage();
+            error_log('Error doing calculation: ' . $message);
+
             return new WP_REST_Response([
-                'message' => 'Internal server error.'
+                'message' => $message ?: 'Internal server error.'
             ], 500);
         }
     }
