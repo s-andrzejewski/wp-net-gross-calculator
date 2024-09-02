@@ -77,10 +77,12 @@
         </div>
     </form>
 
-    <div class="ngc-calculator__result">
-        <p class="ngc-calculator__result-text">
-            The price of product "{{ product_name }}", is: {{ gross_amount }} PLN, the tax amount is {{ tax_amount }} PLN.
-        </p>
-    </div>
+    {#* Prevent purge ignore:
+        <div class="ngc-calculator__result">
+            <p class="ngc-calculator__result-text">
+                The price of product "{{ product_name }}", is: {{ gross_amount }} PLN, the tax amount is {{ tax_amount }} PLN.
+            </p>
+        </div>
+    #}
 </div>
 {% endblock %}
