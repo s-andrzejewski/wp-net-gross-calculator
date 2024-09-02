@@ -4,7 +4,6 @@
  * @since 1.0.0
  */
 const path = require('path')
-require('dotenv').config()
 
 // Paths to find our files.
 const projectPathsBase = require('./webpack/project.paths.js')
