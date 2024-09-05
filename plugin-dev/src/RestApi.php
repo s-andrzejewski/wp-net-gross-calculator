@@ -11,12 +11,12 @@ class RestApi
         add_action('rest_api_init', function () {
             register_rest_route('net-gross-calc/v1', '/calculate', [
                 'methods' => 'POST',
-                'callback' => [__CLASS__, 'prepareCalculation'],
+                'callback' => [__CLASS__, 'handleCalculation'],
             ]);
         });
     }
 
-    public static function prepareCalculation(WP_REST_Request $request)
+    public static function handleCalculation(WP_REST_Request $request)
     {
         $params = [
             'productName' => $request->get_param('productName'),
@@ -29,7 +29,7 @@ class RestApi
         // 'productName' => string,
         // 'netAmount' => double,
         // 'currency' => string,
-        // 'vatRate' => double (eg. 0.23) or null,
+        // 'vatRate' => double
 
         try {
             foreach ($params as $key => $value) {
@@ -54,7 +54,8 @@ class RestApi
                 'message' => 'Calculated successfully.',
                 'result' => $result
             ], 200);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $message = $e->getMessage();
             error_log('Error doing calculation: ' . $message);
 
