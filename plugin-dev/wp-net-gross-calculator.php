@@ -22,6 +22,10 @@ if ( !class_exists('Timber\\Timber') ) {
     echo 'Timber not found. Install it from <a href="https://packagist.org/packages/timber/timber">composer</a>.<br>';
     return;
 }
+if (!function_exists('get_field')) {
+    echo 'Advanced Custom Fields PRO not found. Install it from <a href="https://www.advancedcustomfields.com/pro/">ACF PRO</a>.<br>';
+    return;
+}
 
 define( 'NGC_BASENAME', plugin_basename(__FILE__) );
 define( 'NGC_NAME', dirname(NGC_BASENAME) );
