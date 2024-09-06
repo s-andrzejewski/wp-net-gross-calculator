@@ -1,176 +1,219 @@
 /**
  * SASS
  */
-import '../sass/layout.scss';
+import '../sass/layout.scss'
 
 /**
  * JavaScript
  */
-import axios from 'axios';
+import axios from 'axios'
+
+// TODO: Save results in localStorage, get them on page refresh, add "clear" btn
 
 const calculator = document.querySelector('.ngc-calculator')
 const form = calculator.querySelector('.ngc-calculator__form')
+const formLastChild = form.children.item(form.children.length - 1)
+
 const elements = {
-    'productName': form.querySelector('input[name="product_name"]'),
-    'netAmount': form.querySelector('input[name="net_amount"]'),
-    'currency': form.querySelector('input[name="currency"]'),
-    'vatRate': form.querySelector('select[name="vat_rate"]'),
-}
-
-const calculate = async () => {
-    // TODO: Make loading effect while waiting for response
-    // TODO: Show banner in wordpress (error message (red) or success message (green))
-
-    const oldResultElement = calculator.querySelector('.ngc-calculator__result')
-    if (oldResultElement) {
-        oldResultElement.remove()
-    }
-
-    try {
-        const data = getValidData(form)
-        const response = await axios.post('/wp-json/net-gross-calc/v1/calculate', data)
-        console.log(response.data.message, response.data.result)
-        fillFormWithResponse(response.data.result)
-    }
-    catch (error) {
-        console.error(error);
-        console.error(`Error while calculating (${error['status']}):`, error.response?.data?.message ? error.response.data.message : error.message)
-    }
-};
-
-const handleForm = () => {
-    const submitBtn = form.querySelector('.ngc-calculator__button')
-    submitBtn.addEventListener('click', calculate)
-}
-
-const fillFormWithResponse = (result) => {
-    const newResultElement = document.createElement('div')
-    newResultElement.classList.add('ngc-calculator__result')
-
-    const resultTextElement = document.createElement('p')
-    resultTextElement.classList.add('ngc-calculator__result-text')
-    resultTextElement.textContent = `The price of product "${elements.productName.value}", is: ${result.grossAmount} ${elements.currency.value}, the VAT amount is ${result.vatAmount} ${elements.currency.value}.`
-    
-    newResultElement.appendChild(resultTextElement);
-    calculator.appendChild(newResultElement);
-}
-
-const getValidData = () => {
-    const dataToValidate = {
-        'productName': elements.productName.value,
-        'netAmount': elements.netAmount.value,
-        'currency': elements.currency.value,
-        'vatRate': elements.vatRate.value,
-    }
-
-    const validationResult = validateCalculationFormData(dataToValidate);
-
-    if (validationResult.valid) {
-        console.log('Validated data:', validationResult.data);
-    } else {
-        console.error('Validation errors:', validationResult.errors);
-    }
-
-    return validationResult.data;
+    'productName': form.querySelector('input[name="product-name"]'),
+    'netAmount': form.querySelector('input[name="net-amount"]'),
+    'currency': form.querySelector('select[name="currency"]'),
+    'vatRate': form.querySelector('select[name="vat-rate"]'),
+    'submitBtn': form.querySelector('.ngc-calculator__button')
 }
 
 /**
- * Helper function to validate and format numbers.
- * 
- * This function takes an input string, validates it as a number, and formats it according to specified rules:
- * - Removes all whitespace characters.
- * - Replaces any commas (`,`) with dots (`.`) to ensure the number is properly formatted.
- * - Ensures that the number has two decimal places, adding `.00` if necessary.
- * 
- * @param {string} value - The input value to be validated and formatted.
- * @param {string} fieldName - The name of the field being validated. This is used for error messages.
- * @param {Array} [errors=[]] - An array to collect any validation error messages. The default is an empty array.
- * 
- * @returns {string|null} - Returns the formatted number as a string if valid, otherwise returns `null` and logs an error message in the `errors` array.
- * 
- * @throws {Error} - If the `errors` parameter is not an array.
- * 
- * @example
- * const errors = [];
- * const formattedNumber = validateAndFormatNumber(' 1234,56 ', 'Net Amount', errors);
- * if (formattedNumber) {
- *     console.log('Formatted Number:', formattedNumber); // Output: '1234.56'
- * } else {
- *     console.error('Errors:', errors);
- * }
+ * Validation Functions
  */
-const validateAndFormatNumber = (value, fieldName, errors = []) => {
-    // Ensure 'errors' is an array
-    if (!Array.isArray(errors)) {
-        console.error('"errors" must be an array');
-        return;
-    }
+const setTwoPointsAfterDot = (value) => {
+    value = value.toString()
 
-    if (typeof value !== 'string' || value.trim() === '') {
-        errors.push(`${fieldName} must be a non-empty string.`);
-        return null;
-    }
-
-    // Remove all whitespace chars
-    value = value.replace(/\s+/g, '');
-
-    value = value.replace(',', '.');
-
-    // Convert the string to a float and check if it's a valid number
-    let numberValue = parseFloat(value);
-    if (isNaN(numberValue)) {
-        errors.push(`${fieldName} must be a valid number.`);
-        return null;
-    }
-
-    // Ensure the number has '.00' if it's a whole number
     if (!value.includes('.')) {
-        value += '.00';
+        value += '.00'
     } else {
-        // If there's a dot, ensure there are exactly two decimal places
-        let parts = value.split('.');
+        let parts = value.split('.')
+
         if (parts[1].length === 1) {
-            value += '0';
+            value += '0'
         }
         if (parts[1].length > 2) {
-            // If there are more than two decimal places, round to twho digits after dot
-            value = parseFloat(value).toFixed(2);
+            value = parseFloat(value).toFixed(2)
         }
     }
 
-    return value;
-};
+    return value.toString()
+}
 
-const validateCalculationFormData = (data) => {
-    const errors = [];
+const validateAndFormatNumber = (value, fieldName) => {  
+    let stringValue = value.toString()
 
-    //* productName
-    if (typeof data.productName !== 'string' || data.productName.trim() === '') {
-        errors.push('Product name must be a non-empty string.');
+    if (typeof stringValue === 'string' && stringValue.length === 0) {
+        throw new Error(`${fieldName} must be filled.`)
     }
 
-    //* netAmount
-    data.netAmount = validateAndFormatNumber(data.netAmount, 'Net amount', errors);
+    stringValue = stringValue.replace(',', '.')
 
-    //* currency
-    if (typeof data.currency !== 'string' || data.currency.trim() === '') {
-        errors.push('Currency must be a non-empty string.');
+    // remove all whitespace chars
+    stringValue = stringValue.replace(/\s+/g, '')
+
+    const numberValue = parseFloat(stringValue)
+    if (isNaN(numberValue)) {
+        throw new Error(`${fieldName} must be a valid number.`)
     }
 
-    //* vatRate
-    data.vatRate = validateAndFormatNumber(data.vatRate, 'VAT rate', errors);
+    if (numberValue < 0.0) {
+        throw new Error(`${fieldName} has to be a positive value.`)
+    }
+
+    return setTwoPointsAfterDot(value)
+}
+
+const validateCalculationFormData = () => {
+    const errors = []
+
+    if (typeof elements.productName.value !== 'string' || elements.productName.value.trim() === '') {
+        errors.push('Error: Product name must be a non-empty string.')
+    }
+
+    try {
+        elements.netAmount.value = validateAndFormatNumber(elements.netAmount.value, 'Net amount')
+    } catch (error) {
+        errors.push(error)
+    }
+
+    if (typeof elements.currency.value !== 'string' || elements.currency.value.trim() === '') {
+        errors.push('Error: Currency must be a non-empty string.')
+    }
+
+    try {
+        validateAndFormatNumber(elements.vatRate.value, 'VAT rate')
+    } catch (error) {
+        errors.push(error)
+    }
 
     if (errors.length > 0) {
         return {
             valid: false,
             errors: errors
-        };
+        }
     }
+
+    const data = {}
+    Object.keys(elements).forEach(key => {
+        data[key] = elements[key].value
+    })
 
     return {
         valid: true,
-        data: data
-    };
+        data
+    }
 }
 
-form ? handleForm() : ''
+/**
+ * API Functions
+ */
+const calculate = async () => {
+    const oldResultWrapper = calculator.querySelector('.ngc-calculator__result')
+    if (oldResultWrapper) {
+        oldResultWrapper.remove()
+    }
+
+    const data = getValidData()
+    if (!data) return
+
+    setLoadingState(true)
+
+    try {
+        const response = await axios.post('/wp-json/net-gross-calc/v1/calculate', data)
+        fillFormWithResponse(response.data.result)
+    } catch (error) {
+        console.error(`Error while calculating: ${error.message}`)
+    } finally {
+        setLoadingState(false)
+    }
+}
+
+/**
+ * UI Functions
+ */
+const setLoadingState = (isLoading) => {
+    elements.submitBtn.disabled = isLoading
+    // TODO: Get translations from PHP wp_localize()
+    elements.submitBtn.textContent = isLoading ? 'Loading...' : 'Calculate again'
+}
+
+const fillFormWithResponse = (result) => {
+    const resultTextElement = document.createElement('p')
+    resultTextElement.classList.add('ngc-calculator__result-text')
+    resultTextElement.textContent = `Gross price for product: "${elements.productName.value}", is: ${result.grossAmount} ${elements.currency.value}, including VAT: ${result.vatAmount} ${elements.currency.value}.`
+    
+    const newResultWrapper = document.createElement('div')
+    newResultWrapper.classList.add('ngc-calculator__result')
+    
+    newResultWrapper.appendChild(resultTextElement)
+    form.insertBefore(newResultWrapper, formLastChild)
+
+    elements.submitBtn.textContent = 'Calculate again'
+}
+
+const displayErrors = (errors) => {
+    const errorContainer = document.createElement('div')
+    errorContainer.classList.add('ngc-calculator__error-messages', 'mt-2')
+    
+    errors.forEach(error => {
+        const errorMessage = document.createElement('p')
+        errorMessage.classList.add('text-red-500')
+        errorMessage.textContent = error
+        errorContainer.appendChild(errorMessage)
+    })
+
+    form.insertBefore(errorContainer, formLastChild)
+}
+
+const getValidData = () => {
+    const validationResult = validateCalculationFormData()
+
+    const errorContainer = form.querySelector('.ngc-calculator__error-messages')
+    if (errorContainer) {
+        errorContainer.remove()
+    }
+
+    if (!validationResult.valid) {
+        displayErrors(validationResult.errors)
+        return null
+    }
+
+    return validationResult.data
+}
+
+/**
+ * Event handlers
+ */
+const allowNumbersAndComma = (value) => {       
+    const firstRegex = /[^0-9.,]/g
+    value = value.replace(firstRegex, '')
+    
+    const secondRegex = /^[.,]/
+    if (secondRegex.test(value)) {
+        value = value.replace(secondRegex, '')
+    }
+    
+    return value
+}
+
+const handleForm = () => {
+    elements.submitBtn.addEventListener('click', calculate)
+
+    elements.netAmount.addEventListener('input', (e) => {
+        e.target.value = allowNumbersAndComma(e.target.value)
+    })
+}
+
+/**
+ * Initialization
+ */
+if (form) {
+    handleForm()
+} else {
+    console.error("Form not found! Make sure the form element exists in the DOM.")
+}
