@@ -31,6 +31,7 @@ define( 'NGC_BASENAME', plugin_basename(__FILE__) );
 define( 'NGC_NAME', dirname(NGC_BASENAME) );
 define( 'NGC_URL', untrailingslashit( plugin_dir_url(__FILE__)) );
 define( 'NGC_PATH', untrailingslashit( plugin_dir_path(__FILE__)) );
+
 //* TDOMAIN = text domain
 define( 'NGC_TDOMAIN', 'net-gross-calc' );
 

@@ -14,6 +14,14 @@ class Assets
         add_action('wp_enqueue_scripts', [__CLASS__, 'loadAssets']);
     }
 
+    /**
+     * Loads and enqueues the necessary CSS and JavaScript files for the plugin.
+     *
+     * This function calculates the file modification date of the CSS and JavaScript files,
+     * and then registers and enqueues them with the appropriate version numbers.
+     *
+     * @return void
+     */
     public static function loadAssets()
     {
         $cssPath = NGC_PATH . '/dist/styles/style.min.css';

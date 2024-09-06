@@ -1,11 +1,17 @@
 <?php
-
 namespace NetGrossCalc;
-
 use WP_REST_Request, WP_REST_Response;
 
 class RestApi
 {
+    /** 
+     * Registers REST API routes for the NetGrossCalc plugin. 
+     * 
+     * This function adds a POST route to the 'net-gross-calc/v1' namespace at '/calculate'. 
+     * The route is handled by the 'handleCalculation' method of the same class. 
+     * 
+     * @return void 
+     */ 
     public static function registerRoutes()
     {
         add_action('rest_api_init', function () {
@@ -16,6 +22,19 @@ class RestApi
         });
     }
 
+
+    /**
+     * Handles the calculation request from the REST API.
+     *
+     * This function validates the input parameters, performs the calculation using the Calculator class,
+     * and returns the result or an appropriate error message.
+     *
+     * @param WP_REST_Request $request The request object containing the input parameters.
+     *
+     * @return WP_REST_Response The response object containing the result or an error message.
+     *
+     * @throws Exception If an error occurs during the calculation.
+     */
     public static function handleCalculation(WP_REST_Request $request)
     {
         $params = [
