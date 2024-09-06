@@ -121,6 +121,7 @@
     "WP-Pot"
   ],
   "dependencies": {
+    "@tailwindcss/forms": "^0.5.8",
     "cssnano": "^6.0.1"
   }
 }
